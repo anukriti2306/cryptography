@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cipher Implementation Showcase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Adding a subtle background pattern for texture */
+            background-image: radial-gradient(circle at 1px 1px, #4b5563 1px, transparent 0);
+            background-size: 2rem 2rem;
+        }
+        .tab-active {
+            border-color: #3b82f6; /* blue-500 */
+            color: #3b82f6;
+        }
+        .tab-inactive {
+            border-color: transparent;
+            color: #9ca3af; /* gray-400 */
+        }
+        .output-box {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        /* Custom scrollbar for a modern look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827; /* gray-900 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #374151; /* gray-700 */
+            border-radius: 4px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #4b5563; /* gray-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-300">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-white">A Case Study on Cipher Implementations</h1>
+            <p class="text-lg text-gray-400 mt-2">An interactive demonstration of Caesar, Vigenère, and RSA ciphers.</p>
+        </header>
+
+        <!-- Tabs Navigation -->
+        <div class="mb-6">
+            <div class="border-b border-gray-700">
+                <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                    <button id="tab-caesar" class="tab-active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200">Caesar Cipher</button>
+                    <button id="tab-vigenere" class="tab-inactive whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 hover:text-blue-400 hover:border-blue-400">Vigenère Cipher</button>
+                    <button id="tab-rsa" class="tab-inactive whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 hover:text-blue-400 hover:border-blue-400">RSA Cipher</button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Caesar Cipher Panel -->
+        <div id="panel-caesar" class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 text-blue-400">Caesar Cipher</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Input Column -->
+                <div>
+                    <div class="mb-4">
+                        <label for="caesar-text" class="block text-sm font-medium text-gray-400 mb-1">Text</label>
+                        <textarea id="caesar-text" rows="4" class="w-full p-3 bg-gray-700 border border-gray-600 text-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-500" placeholder="Enter text to encrypt/decrypt..."></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="caesar-shift" class="block text-sm font-medium text-gray-400 mb-1">Shift Value (Key)</label>
+                        <input type="number" id="caesar-shift" value="3" class="w-full p-3 bg-gray-700 border border-gray-600 text-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                    <div class="flex space-x-4">
+                        <button id="caesar-encrypt" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 transition-colors duration-200 font-semibold">Encrypt</button>
+                        <button id="caesar-decrypt" class="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-400 transition-colors duration-200 font-semibold">Decrypt</button>
+                    </div>
+                </div>
+                <!-- Output Column -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Result</label>
+                    <div id="caesar-output" class="w-full h-48 p-3 border border-gray-600 rounded-md bg-gray-900 output-box font-mono text-cyan-400"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vigenère Cipher Panel -->
+        <div id="panel-vigenere" class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl shadow-lg hidden">
+            <h2 class="text-2xl font-semibold mb-4 text-blue-400">Vigenère Cipher</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Input Column -->
+                <div>
+                    <div class="mb-4">
+                        <label for="vigenere-text" class="block text-sm font-medium text-gray-400 mb-1">Text</label>
+                        <textarea id="vigenere-text" rows="4" class="w-full p-3 bg-gray-700 border border-gray-600 text-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-500" placeholder="Enter text to encrypt/decrypt..."></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="vigenere-key" class="block text-sm font-medium text-gray-400 mb-1">Keyword</label>
+                        <input type="text" id="vigenere-key" value="KEY" class="w-full p-3 bg-gray-700 border border-gray-600 text-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                    <div class="flex space-x-4">
+                        <button id="vigenere-encrypt" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 transition-colors duration-200 font-semibold">Encrypt</button>
+                        <button id="vigenere-decrypt" class="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-400 transition-colors duration-200 font-semibold">Decrypt</button>
+                    </div>
+                </div>
+                <!-- Output Column -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Result</label>
+                    <div id="vigenere-output" class="w-full h-48 p-3 border border-gray-600 rounded-md bg-gray-900 output-box font-mono text-cyan-400"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RSA Cipher Panel -->
+        <div id="panel-rsa" class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl shadow-lg hidden">
+            <h2 class="text-2xl font-semibold mb-4 text-blue-400">RSA Cipher</h2>
+            <p class="text-sm text-gray-500 mb-4">Note: This is a simplified demonstration using small prime numbers. Real-world RSA uses extremely large primes for security. Text is converted to ASCII values for encryption.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Input/KeyGen Column -->
+                <div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="rsa-p" class="block text-sm font-medium text-gray-400 mb-1">Prime p</label>
+                            <input type="number" id="rsa-p" value="61" class="w-full p-3 bg-gray-700 border border-gray-600 text-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        </div>
+                        <div>
+                            <label for="rsa-q" class="block text-sm font-medium text-gray-400 mb-1">Prime q</label>
+                            <input type="number" id="rsa-q" value="53" class="w-full p-3 bg-gray-700 border border-gray-600 text-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        </div>
+                    </div>
+                     <button id="rsa-keygen" class="w-full mb-4 bg-teal-600 text-white py-2 px-4 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-teal-500 transition-colors duration-200 font-semibold">Generate Keys</button>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Public Key (e, n)</label>
+                        <div id="rsa-public-key" class="w-full p-3 border border-gray-600 rounded-md bg-gray-900 output-box font-mono text-green-400"></div>
+                    </div>
+                     <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Private Key (d, n)</label>
+                        <div id="rsa-private-key" class="w-full p-3 border border-gray-600 rounded-md bg-gray-900 output-box font-mono text-red-400"></div>
+                    </div>
+
+                    <div class="flex space-x-4">
+                        <button id="rsa-encrypt" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 transition-colors duration-200 font-semibold">Encrypt</button>
+                        <button id="rsa-decrypt" class="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-400 transition-colors duration-200 font-semibold">Decrypt</button>
+                    </div>
+
+                </div>
+                <!-- Message/Result Column -->
+                <div>
+                     <div class="mb-4">
+                        <label for="rsa-text" class="block text-sm font-medium text-gray-400 mb-1">Text / Ciphertext (comma-separated)</label>
+                        <textarea id="rsa-text" rows="4" class="w-full p-3 bg-gray-700 border border-gray-600 text-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-500" placeholder="Enter text to encrypt, or comma-separated numbers to decrypt..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Result</label>
+                        <div id="rsa-output" class="w-full h-48 p-3 border border-gray-600 rounded-md bg-gray-900 output-box font-mono text-cyan-400"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Tab Management ---
+        const tabs = {
+            caesar: document.getElementById('tab-caesar'),
+            vigenere: document.getElementById('tab-vigenere'),
+            rsa: document.getElementById('tab-rsa'),
+        };
+        const panels = {
+            caesar: document.getElementById('panel-caesar'),
+            vigenere: document.getElementById('panel-vigenere'),
+            rsa: document.getElementById('panel-rsa'),
+        };
+
+        const setActiveTab = (tabName) => {
+            Object.keys(tabs).forEach(key => {
+                const tab = tabs[key];
+                const panel = panels[key];
+                if (key === tabName) {
+                    tab.classList.remove('tab-inactive');
+                    tab.classList.add('tab-active');
+                    panel.classList.remove('hidden');
+                } else {
+                    tab.classList.remove('tab-active');
+                    tab.classList.add('tab-inactive');
+                    panel.classList.add('hidden');
+                }
+            });
+        };
+
+        tabs.caesar.addEventListener('click', () => setActiveTab('caesar'));
+        tabs.vigenere.addEventListener('click', () => setActiveTab('vigenere'));
+        tabs.rsa.addEventListener('click', () => setActiveTab('rsa'));
+
+        // --- Caesar Cipher Logic ---
+        const caesarText = document.getElementById('caesar-text');
+        const caesarShift = document.getElementById('caesar-shift');
+        const caesarOutput = document.getElementById('caesar-output');
+
+        function performCaesar(text, shift, encrypt) {
+            shift = encrypt ? shift : -shift;
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char.match(/[a-z]/i)) {
+                    const code = text.charCodeAt(i);
+                    // Uppercase letters
+                    if ((code >= 65) && (code <= 90)) {
+                        char = String.fromCharCode(((code - 65 + shift) % 26 + 26) % 26 + 65);
+                    }
+                    // Lowercase letters
+                    else if ((code >= 97) && (code <= 122)) {
+                        char = String.fromCharCode(((code - 97 + shift) % 26 + 26) % 26 + 97);
+                    }
+                }
+                result += char;
+            }
+            return result;
+        }
+
+        document.getElementById('caesar-encrypt').addEventListener('click', () => {
+            const shift = parseInt(caesarShift.value, 10);
+            if (isNaN(shift)) {
+                caesarOutput.textContent = 'Error: Shift value must be a number.';
+                return;
+            }
+            caesarOutput.textContent = performCaesar(caesarText.value, shift, true);
+        });
+
+        document.getElementById('caesar-decrypt').addEventListener('click', () => {
+            const shift = parseInt(caesarShift.value, 10);
+            if (isNaN(shift)) {
+                caesarOutput.textContent = 'Error: Shift value must be a number.';
+                return;
+            }
+            caesarOutput.textContent = performCaesar(caesarText.value, shift, false);
+        });
+
+        // --- Vigenère Cipher Logic ---
+        const vigenereText = document.getElementById('vigenere-text');
+        const vigenereKey = document.getElementById('vigenere-key');
+        const vigenereOutput = document.getElementById('vigenere-output');
+        
+        function performVigenere(text, key, encrypt) {
+            if (!/^[a-zA-Z]+$/.test(key)) {
+                return 'Error: Keyword must only contain letters.';
+            }
+            key = key.toUpperCase();
+            let result = '';
+            let keyIndex = 0;
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char.match(/[a-z]/i)) {
+                    const keyChar = key[keyIndex % key.length];
+                    const shift = keyChar.charCodeAt(0) - 65;
+                    const direction = encrypt ? 1 : -1;
+                    
+                    const code = text.charCodeAt(i);
+                    // Uppercase
+                    if ((code >= 65) && (code <= 90)) {
+                        char = String.fromCharCode(((code - 65 + direction * shift) % 26 + 26) % 26 + 65);
+                    }
+                    // Lowercase
+                    else if ((code >= 97) && (code <= 122)) {
+                        char = String.fromCharCode(((code - 97 + direction * shift) % 26 + 26) % 26 + 97);
+                    }
+                    keyIndex++;
+                }
+                result += char;
+            }
+            return result;
+        }
+
+        document.getElementById('vigenere-encrypt').addEventListener('click', () => {
+             vigenereOutput.textContent = performVigenere(vigenereText.value, vigenereKey.value, true);
+        });
+        document.getElementById('vigenere-decrypt').addEventListener('click', () => {
+             vigenereOutput.textContent = performVigenere(vigenereText.value, vigenereKey.value, false);
+        });
+
+
+        // --- RSA Cipher Logic ---
+        // Note: Using BigInt for calculations to handle large numbers.
+        const rsaP = document.getElementById('rsa-p');
+        const rsaQ = document.getElementById('rsa-q');
+        const rsaPublicKey = document.getElementById('rsa-public-key');
+        const rsaPrivateKey = document.getElementById('rsa-private-key');
+        const rsaText = document.getElementById('rsa-text');
+        const rsaOutput = document.getElementById('rsa-output');
+
+        let rsaKeys = {};
+
+        // Helper functions for RSA using BigInt
+        const gcd = (a, b) => b === 0n ? a : gcd(b, a % b);
+        const modInverse = (e, phi) => {
+            let [m0, y, x] = [phi, 0n, 1n];
+            if (phi === 1n) return 0n;
+            while (e > 1n) {
+                let q = e / m0;
+                [e, m0] = [m0, e % m0];
+                [x, y] = [y, x - q * y];
+            }
+            if (x < 0n) x += phi;
+            return x;
+        };
+        const modPow = (base, exp, mod) => {
+            let res = 1n;
+            base %= mod;
+            while (exp > 0n) {
+                if (exp % 2n === 1n) res = (res * base) % mod;
+                exp >>= 1n;
+                base = (base * base) % mod;
+            }
+            return res;
+        };
+        
+        // Simple primality test for demonstration
+        const isPrime = (num) => {
+            if (num <= 1n) return false;
+            if (num <= 3n) return true;
+            if (num % 2n === 0n || num % 3n === 0n) return false;
+            for (let i = 5n; i * i <= num; i = i + 6n) {
+                if (num % i === 0n || num % (i + 2n) === 0n) return false;
+            }
+            return true;
+        }
+
+        document.getElementById('rsa-keygen').addEventListener('click', () => {
+            const p = BigInt(rsaP.value);
+            const q = BigInt(rsaQ.value);
+
+            if (!isPrime(p) || !isPrime(q)) {
+                rsaPublicKey.textContent = 'Error: p and q must be prime numbers.';
+                rsaPrivateKey.textContent = '';
+                return;
+            }
+            if (p === q) {
+                 rsaPublicKey.textContent = 'Error: p and q cannot be the same.';
+                 rsaPrivateKey.textContent = '';
+                 return;
+            }
+
+            const n = p * q;
+            const phi = (p - 1n) * (q - 1n);
+
+            let e = 3n; // Common choice for e
+            while (gcd(e, phi) !== 1n) {
+                e += 2n;
+            }
+            
+            const d = modInverse(e, phi);
+
+            rsaKeys = { n, e, d };
+            rsaPublicKey.textContent = `e: ${e}, n: ${n}`;
+            rsaPrivateKey.textContent = `d: ${d}, n: ${n}`;
+        });
+        
+        document.getElementById('rsa-encrypt').addEventListener('click', () => {
+            if (!rsaKeys.n) {
+                rsaOutput.textContent = 'Please generate keys first.';
+                return;
+            }
+            const message = rsaText.value;
+            const encrypted = [];
+            for (let i = 0; i < message.length; i++) {
+                const charCode = BigInt(message.charCodeAt(i));
+                if (charCode >= rsaKeys.n) {
+                    rsaOutput.textContent = `Error: Message contains character (ASCII ${charCode}) larger than n (${rsaKeys.n}). Choose larger primes.`;
+                    return;
+                }
+                encrypted.push(modPow(charCode, rsaKeys.e, rsaKeys.n).toString());
+            }
+            rsaOutput.textContent = encrypted.join(',');
+        });
+        
+        document.getElementById('rsa-decrypt').addEventListener('click', () => {
+            if (!rsaKeys.n) {
+                rsaOutput.textContent = 'Please generate keys first.';
+                return;
+            }
+            const encrypted = rsaText.value.split(',');
+            let decrypted = '';
+            try {
+                for (let i = 0; i < encrypted.length; i++) {
+                    const num = BigInt(encrypted[i].trim());
+                    const charCode = modPow(num, rsaKeys.d, rsaKeys.n);
+                    decrypted += String.fromCharCode(Number(charCode));
+                }
+                rsaOutput.textContent = decrypted;
+            } catch (e) {
+                rsaOutput.textContent = 'Error: Invalid ciphertext format. Ensure it is a comma-separated list of numbers.';
+            }
+        });
+
+        // Initialize default RSA keys on load
+        document.getElementById('rsa-keygen').click();
+
+    </script>
+
+</body>
+</html>
+
